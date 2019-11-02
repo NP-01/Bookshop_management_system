@@ -3,98 +3,118 @@ import random
 import re
 import pickle
 import os
-
+import getpass
 #----------------------------------------BOOK---------------------------------------------------------
 
 class Book:
-    def __init__(self,a):
-        random.seed(time.time())
-        self.status = a
-        self.id = "BID00000"
-        if(a==1):
-            self.status = a
-            self.id = "BID" + str(int((random.random()*(10**6))))
-            self.name = input("\nName:  ")
-            self.author =(input("\nAuthor:  "))
-            self.price= int(input("\nPrice:  "))
-            self.number_of_pages = int(input("\nNo. of Pages:  "))
-            
-    # The default function is overwritten
-    def __str__(self):
-        if(self.status==1):
-            return "%s\t%s\t\t%s\t\t%d\t\t%s" % (self.id,self.name,self.author,self.price,self.number_of_pages)
-        else:
-            return "\n\nEND OF FILE"
-    def showdata(self):
-        print("The details of desired Books are as follows: ")
-        print(self.id)
-        print(self.name)
-        print(self.author)
-        print(self.price)
-        print(self.number_of_pages)
+	def __init__(self,a):
+		random.seed(time.time())
+		self.status = a
+		self.id = "BID00000"
+		if(a==1):
+			self.status = a
+			self.id = "BID" + str(int((random.random()*(10**6))))
+			self.name = input("\nName:  ")
+			self.author =(input("\nAuthor:  "))
+			self.price= int(input("\nPrice:  "))
+			self.number_of_pages = int(input("\nNo. of Pages:  "))
+			self.stock = 1
+	# The default function is overwritten
+	def __str__(self):
+		if(self.status==1):
+			return "%s\t%s\t\t%s" % (self.id,self.author,self.name)
+		else:
+			return "\n\nEND OF FILE"
+	def showdata(self):
+		print("The details of desired Books are as follows: ")
+		print(self.id)
+		print(self.name)
+		print(self.author)
+		print(self.price)
+		print(self.number_of_pages)
+
 def Display_All_Book():
-        print("Book List")
-        print("\n-----------------------------------------------------------------------------------------------------------------------------------")
-        print("-----------------------------------------------------------------------------------------------------------------------------------")
-        print("Sr.no\t  ID\t\tName\t\tAuthor Name\tPrice\t\tNumber of Pages")
-        print("-----------------------------------------------------------------------------------------------------------------------------------")
-        print("-----------------------------------------------------------------------------------------------------------------------------------")
-        l = 1
-        with open('book.txt','rb') as file:
-            while True:
-                try:
-                    B = pickle.load(file)
-                    print(l,"\t",B)
-                    l = l + 1
-                except EOFError:
-                    print("\n\nFile finished.......")
-                    break
+		print("Book List")
+		print("\n-----------------------------------------------------------------------------------------------------------------------------------")
+		print("-----------------------------------------------------------------------------------------------------------------------------------")
+		print("Sr.no\t  ID\t\tAuthor Name\t\t\t\tName")
+		print("-----------------------------------------------------------------------------------------------------------------------------------")
+		print("-----------------------------------------------------------------------------------------------------------------------------------")
+		l = 1
+		with open('book.txt','rb') as file:
+			while True:
+				try:
+					B = pickle.load(file)
+					print(l,"\t",B)
+					l = l + 1
+				except EOFError:
+					print("\n\nFile finished.......")
+					break
 
 def Create_Book():
 	B = Book(1) 
-	with open('book.txt','ab') as file:
-		pickle.dump(B,file)
+	with open('book.txt', 'rb+') as file:
+		while True:
+			try:
+				B1 = pickle.load(file)
+				if(B1.name == B.name):
+					print("Book already exists !")
+					print("Number of copies: ",B1.stock,"\nDo you wish to increment the stock ?...(y/n)")
+					ch = input()
+					if ch == 'y':
+						change = int(input("Enter the number number of copies to add:  "))
+						B1.stock = B1.stock + change
+						file.seek(-64,1)
+						pickle.dump(B1,file)
+						break
+					else:
+						break
+			except EOFError:
+				with open('book.txt','ab') as file:
+					pickle.dump(B,file)
+				break
 	print("\n\nCreating Book Record. Please Wait...........")
 	time.sleep(3)
 	print("\nBook Record Created...")
 
-def Display_Book(cust_id):
-	B = Customer(0)
+def Display_Book(book_id):
+	B = Book(0)
 	with open('book.txt','rb') as file:
-		while(cust_id != B.id):
+		while(book_id != B.id):
 			B = pickle.load(file)
 
 	B.showdata()
 
-def Modify_Book(cust_id):
+def Modify_Book(book_id):
 	with open('book.txt','rb+') as file:
 		B = pickle.load(file)
 	
-		print("Choose the parameter to modify:\n\n[1]Name\n\n[2]Author\n\n[3]Price\n\n[4]Number_of_Pages")
+		print("Choose the parameter to modify:\n\n[1]Name\n\n[2]Author\n\n[3]Price\n\n[4]Number of Pages")
 		p = int(input())
 			
-		while(cust_id != B.id):
+		while(book_id != B.id):
 			B = pickle.load(file)
 			
 		if(p==1):
 			B.name = input("Enter the new data:  ")
-			file.seek(-56,1)
+			file.seek(-64,1)
 			pickle.dump(B,file)
 		
 		elif(p==2):
 			B.author = int(input("Enter the new data:  "))
-			file.seek(-56,1)
+			file.seek(-64,1)
 			pickle.dump(B,file)
 			
 		elif(p==3):
 			B.price = input("Enter the new data:  ")
-			file.seek(-56,1)
+			file.seek(-64,1)
 			pickle.dump(B,file)
 
 		elif(p==4):
 			B.number_of_pages = int(input("Enter the new data:  "))
-			file.seek(-56,1)
+			file.seek(-64,1)
 			pickle.dump(B,file)
+
 
 		else:
 			print("Invalid Option!")
@@ -104,7 +124,7 @@ def Modify_Book(cust_id):
 			time.sleep(3)
 			print("Book Record Modified")
 
-def Delete_Book(cust_id):
+def Delete_Book(book_id):
 	books = []
 
 	with open('book.txt','rb') as file:
@@ -115,7 +135,7 @@ def Delete_Book(cust_id):
 				break
 
 	for i in range(0,len(books)) :
-		if books[i].id == cust_id :
+		if books[i].id == book_id :
 			break
 
 	del books[i]
@@ -182,11 +202,22 @@ class Customer:
 
 def Create_New_Customer():
 	C = Customer(1) 
-	with open('customers.txt','ab') as file:
-		pickle.dump(C,file)
-	print("\n\nCreating Customer Record. Please Wait...........")
-	time.sleep(3)
-	print("\nCustomer Record Created...")
+
+	with open('customers.txt', 'rb') as file:
+		while True:
+			try:
+				C1 = pickle.load(file)
+				if(C1.mobile_no == C.mobile_no):
+					print("Customer already exists !")
+					break
+
+			except EOFError:
+				with open('customers.txt','ab') as file:
+					pickle.dump(C,file)
+				print("\n\nCreating Customer Record. Please Wait...........")
+				time.sleep(3)
+				print("\nCustomer Record Created...")
+				break
 
 def Display_All_Records():		
 	print("CUSTOMER LIST")
@@ -292,7 +323,39 @@ def Book_Purchase():
 
 	if(n==2):
 		auth=str(input("Enter Author Name:"))
-		
+	
+	B = Book(0)
+	with open('book.txt','rb') as file:
+		while(name != B.name):
+			B = pickle.load(file)
+
+	if B.stock >=1 :
+		B.showdata()
+		pwd = getpass.getpass("Enter the admin password: ")
+		v = 3
+		while v!=0:
+			if pwd == 'iiitn' :
+				print("Book purchase successful")
+				with open('book.txt','rb+') as file:
+					B1 = pickle.load(file)
+					while(B1.id != B.id):
+						B1 = pickle.load(file)
+					change = int(input("Enter the number number of copies to remove:  "))
+					B1.stock = B1.stock - change
+					file.seek(-64,1)
+					pickle.dump(B1,file)
+	
+			else:
+				v = v - 1;
+				print("Number of chances left = %d\n" % v)
+				pwd = getpass.getpass("Enter the admin password: ")
+
+	else :
+		print("Book is out of stock !")
+		Main_Menu()
+
+
+
 def Book_Donate():
 		print("Book Donate Portal")
 		print("Thanks To Donate To Our Franchise")
@@ -302,109 +365,119 @@ def Book_Donate():
 			Create_Book()
 			dh1 = 'N'
 			dh1 = input("\nDo you want to Donate more book...(y/N)?")
-#---------------------------------------------------MainMenu--------------------------------------------------
+#---------------------------------------------------AdminMenu--------------------------------------------------
+
 def Admin_Menu():
-	ch0 = 'y'
-	while ch0=='y' or ch0=='Y':
-		os.system("clear")
-		print("ADMINISTRATOR MENU")
-		print("\n1. CREATE CUSTOMER RECORD")
-		print("\n2. DISPLAY ALL CUTOMERS RECORD")
-		print("\n3. DISPLAY SPECIFIC CUSTOMER RECORD")
-		print("\n4. MODIFY CUSTOMER RECORD")
-		print("\n5. DELETE CUSTOMER RECORD")
-		print("\n6. CREATE BOOK")
-		print("\n7. DISPLAY ALL BOOKS")
-		print("\n8. DISPLAY SPECIFIC BOOK")
-		print("\n9. MODIFY BOOK")
-		print("\n10. DELETE BOOK")
-		print("\n11. BACK TO MAIN MENU")
-		n = int(input("\nPlease Enter Yout Choice (1-11)"))
+	user = getpass.getuser()
+	print("User Name:",user)
+	pwd = getpass.getpass("Enter the admin password: ") 
+	
+	if pwd == 'iiitn': 
+		ch0 = 'y'
+		while ch0=='y' or ch0=='Y':
+			os.system("clear")
+			print("\nWelcome to the ADMINISTRATOR MENU!!!\n")
+			print("\n1. CREATE CUSTOMER RECORD")
+			print("\n2. DISPLAY ALL CUSTOMER RECORDS")
+			print("\n3. DISPLAY SPECIFIC CUSTOMER RECORD")
+			print("\n4. MODIFY CUSTOMER RECORD")
+			print("\n5. DELETE CUSTOMER RECORD")
+			print("\n6. CREATE BOOK")
+			print("\n7. DISPLAY ALL BOOKS")
+			print("\n8. DISPLAY SPECIFIC BOOK")
+			print("\n9. MODIFY BOOK")
+			print("\n10. DELETE BOOK")
+			print("\n11. BACK TO MAIN MENU")
+			n = int(input("\nPlease Enter Your Choice (1-11)"))
 
-		if n==1:
-			ch1 = 'y'
-			while ch1=='y' or ch1=='Y':
-				Create_New_Customer()
-				ch1 = 'N'
-				ch1 = input("\nDo you want to add more record...(y/N)?")	
+			if n==1:
+				ch1 = 'y'
+				while ch1=='y' or ch1=='Y':
+					Create_New_Customer()
+					ch1 = 'N'
+					ch1 = input("\nDo you want to add more record...(y/N)?")	
 
-		if n==2:
-			Display_All_Records()
+			if n==2:
+				Display_All_Records()
 
-		if n==3:
-			ch3 = 'y'
-			while ch3=='y' or ch3=='Y' :
+			if n==3:
+				ch3 = 'y'
+				while ch3=='y' or ch=='Y' :
+					print("Enter the ID of the customer:  ",end=" ")
+					cust_id = input()
+					Display_Record(cust_id)
+					ch3 = 'N'
+					ch3 = input("\n\nDo you want to print details of another customer...(y/N)?  ")
+				
+			if n==4:
 				print("Enter the ID of the customer:  ",end=" ")
 				cust_id = input()
-				Display_Record(cust_id)
-				ch3 = 'N'
-				ch3 = input("\n\nDo you want to print details of another customer...(y/N)?  ")
-			
-		if n==4:
-			print("Enter the ID of the customer:  ",end=" ")
-			cust_id = input()
-			ch4 = 'y'
-			while ch4=='y' or ch4=='Y':
-				Modify_Record(cust_id)
-				ch4 = 'N'
-				print("\nDo you want to modify another record...(y/N)?  ",end=" ")
-				ch4 = input()
+				ch4 = 'y'
+				while ch4=='y' or ch4=='Y':
+					Modify_Record(cust_id)
+					ch4 = 'N'
+					print("\nDo you want to modify another record...(y/N)?  ",end=" ")
+					ch4 = input()
 
-		if n==5:
-			cust_id = input("Enter the customer ID:  ")
-			ch5 = 'y'
-			while ch5=='y' or ch5=='Y':
-				Delete_Record(cust_id)
-				ch5 = 'N'
-				print("\nDo you want to delete another record...(y/N)?  ",end=" ")
-				ch5 = input()
-
-		if n==6:
-			bh1 = 'y'
-			while bh1=='y' or bh1=='Y':
-				Create_Book()
-				bh1 = 'N'
-				bh1 = input("\nDo you want to add more book...(y/N)?")
+			if n==5:
+				cust_id = input("Enter the customer ID:  ")
+				ch5 = 'y'
+				while ch5=='y' or ch5=='Y':
+					Delete_Record(cust_id)
+					ch5 = 'N'
+					print("\nDo you want to delete another record...(y/N)?  ",end=" ")
+					ch5 = input()
 			
-		
-		if n==7:
-			Display_All_Book()
-		
-		if n==8:
-			bh3 = 'y'
-			while bh3=='y' or bh3=='Y' :
+			if n==6:
+				bh1 = 'y'
+				while bh1=='y' or bh1=='Y':
+					Create_Book()
+					bh1 = 'N'
+					bh1 = input("\nDo you want to add more book...(y/N)?")
+				
+			if n==7:
+				Display_All_Book()
+			
+			if n==8:
+				bh3 = 'y'
+				while bh3=='y' or bh3=='Y' :
+					print("Enter the ID of the Book:  ",end=" ")
+					cust_id = input()
+					Display_Record(cust_id)
+					bh3 = 'N'
+					bh3 = input("\n\nDo you want to print details of another customer...(y/N)?  ")		
+			if n==9:
 				print("Enter the ID of the Book:  ",end=" ")
 				cust_id = input()
-				Display_Record(cust_id)
-				bh3 = 'N'
-				bh3 = input("\n\nDo you want to print details of another customer...(y/N)?  ")		
-		if n==9:
-			print("Enter the ID of the Book:  ",end=" ")
-			cust_id = input()
-			bh4 = 'y'
-			while bh4=='y' or bh4=='Y':
-				Modify_Book(cust_id)
-				bh4 = 'N'
-				print("\nDo you want to modify another record...(y/N)?  ",end=" ")
-				bh4 = input()
-		
-		if n==10:
-			cust_id = input("Enter the Book ID:  ")
-			bh5 = 'y'
-			while bh5=='y' or bh5=='Y':
-				Delete_Book(cust_id)
-				bh5 = 'N'
-				print("\nDo you want to delete another book record...(y/N)?  ",end=" ")
-				bh5 = input()
+				bh4 = 'y'
+				while bh4=='y' or bh4=='Y':
+					Modify_Book(cust_id)
+					bh4 = 'N'
+					print("\nDo you want to modify another record...(y/N)?  ",end=" ")
+					bh4 = input()
+			
+			if n==10:
+				cust_id = input("Enter the Book ID:  ")
+				bh5 = 'y'
+				while bh5=='y' or bh5=='Y':
+					Delete_Book(cust_id)
+					bh5 = 'N'
+					print("\nDo you want to delete another book record...(y/N)?  ",end=" ")
+					bh5 = input()
 
-		if n==11:
-			Main_Menu()
+			if n==11:
+				Main_Menu()
 
-		ch0 = 'N'
-		ch0 = input("\n\nDo you want to choose another option....(y/N)?  ")
+			ch0 = 'N'
+			ch0 = input("\n\nDo you want to choose another option from the ADMINISTRATOR MENU....(y/N)?  ")
+	else: 
+		print("The password you entered is incorrect.")
+		Main_Menu()
 
+#---------------------------------------------------MainMenu--------------------------------------------------
 
 def Main_Menu():
+	os.system("clear")
 	print("MAIN MENU")
 	print("\n1. BOOK PURCHASE")
 	print("\n2. BOOK DONATE")
@@ -412,10 +485,6 @@ def Main_Menu():
 	print("\n4. EXIT")
 	n = int(input("\nPlease Select Your Option (1-4)  "))
 
-	if(n==1):
-		Book_Purchase()
-	if(n==2):
-		Book_Donate()
 	if(n==3):
 		Admin_Menu()
 
