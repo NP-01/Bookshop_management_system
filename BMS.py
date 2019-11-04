@@ -32,12 +32,12 @@ def Send_OTP():
 	s.quit()
 	return otp
 
-def Send_ID(C):
+def Send_ID(cust_id, email_id):
 	s = smtplib.SMTP('smtp.gmail.com', 587)
 	s.starttls()
 	s.login("iiitn.bookshop@gmail.com", "lsx7P%jD14OtgrNr73eG")
-	message = "Hi!" + C.name + "\b,Your Customer Id is:", + C.cust_id
-	s.sendmail("iiitn.bookshop@gmail.com", C.email_id, message)
+	message = cust_id
+	s.sendmail("iiitn.bookshop@gmail.com", email_id, message)
 	s.quit()
 #----------------------------------------BOOK---------------------------------------------------------
 
@@ -155,10 +155,10 @@ def Modify_Book(book_id):
 		B.name = input("Enter the new data:  ")
 	
 	elif(p==2):
-		B.author = int(input("Enter the new data:  "))
+		B.author = input("Enter the new data:  ")
 		
 	elif(p==3):
-		B.price = input("Enter the new data:  ")
+		B.price = int(input("Enter the new data:  "))
 	
 	elif(p==4):
 		B.number_of_pages = int(input("Enter the new data:  "))
@@ -167,10 +167,10 @@ def Modify_Book(book_id):
 		s = int(input("Enter [1] to increment stock else [2] to decrement stock:  "))
 
 		if s==1:
-			B.stock = B.stock - 1
+			B.stock = B.stock + 1
 		
 		elif s==2:
-			B.stock = B.stock + 1
+			B.stock = B.stock - 1
 		
 	else:
 		print("Invalid Option!")
@@ -282,7 +282,7 @@ def Create_New_Customer():
 				print("\n\nCreating Customer Record. Please Wait...........")
 				time.sleep(3)
 				print("\nCustomer Record Created...")
-				Send_ID(C)
+				Send_ID(C.id,C.email_id)
 				break
 
 def Display_All_Records():		
@@ -426,7 +426,7 @@ def Book_Purchase():
 				B = pickle.load(file)
 				if(auth == B.author):
 					books.append(B)
-				while(auth != B.author):
+				while(auth == B.author):
 					try:
 						B = pickle.load(file)
 						books.append(B)
@@ -541,23 +541,21 @@ def Admin_Menu():
 					ch3 = input("\n\nDo you want to print details of another customer...(y/N)?  ")
 				
 			if n==4:
-				print("Enter the ID of the customer:  ",end=" ")
-				cust_id = input()
 				ch4 = 'y'
 				while ch4=='y' or ch4=='Y':
+					print("Enter the ID of the customer:  ",end=" ")
+					cust_id = input()
 					Modify_Record(cust_id)
 					ch4 = 'N'
-					print("\nDo you want to modify another record...(y/N)?  ",end=" ")
-					ch4 = input()
+					ch4 = input("\n\nDo you want modify another customer record...(y/N)? ")
 
 			if n==5:
-				cust_id = input("Enter the customer ID:  ")
 				ch5 = 'y'
 				while ch5=='y' or ch5=='Y':
+					cust_id = input("Enter the customer ID:  ")
 					Delete_Record(cust_id)
 					ch5 = 'N'
-					print("\nDo you want to delete another record...(y/N)?  ",end=" ")
-					ch5 = input()
+					ch5 = input("\n\nDo you want delete another customer record...(y/N)? ")
 			
 			if n==6:
 				bh1 = 'y'
@@ -573,28 +571,26 @@ def Admin_Menu():
 				bh3 = 'y'
 				while bh3=='y' or bh3=='Y' :
 					print("Enter the ID of the Book:  ",end=" ")
-					cust_id = input()
-					Display_Record(cust_id)
+					book_id = input()
+					Display_Book(book_id)
 					bh3 = 'N'
-					bh3 = input("\n\nDo you want to print details of another customer...(y/N)?  ")		
+					bh3 = input("\n\nDo you want to print details of another book...(y/N)?  ")		
 			if n==9:
-				print("Enter the ID of the Book:  ",end=" ")
-				cust_id = input()
 				bh4 = 'y'
 				while bh4=='y' or bh4=='Y':
-					Modify_Book(cust_id)
+					print("Enter the ID of the Book:  ",end=" ")
+					book_id = input()
+					Modify_Book(book_id)
 					bh4 = 'N'
-					print("\nDo you want to modify another record...(y/N)?  ",end=" ")
-					bh4 = input()
+					bh4 = input("\n\nDo you want modify another book record...(y/N)? ")
 			
 			if n==10:
-				cust_id = input("Enter the Book ID:  ")
+				book_id = input("Enter the Book ID:  ")
 				bh5 = 'y'
 				while bh5=='y' or bh5=='Y':
-					Delete_Book(cust_id)
+					Delete_Book(book_id)
 					bh5 = 'N'
-					print("\nDo you want to delete another book record...(y/N)?  ",end=" ")
-					bh5 = input()
+					bh5 = input("\n\nDo you want delete another book record...(y/N)? ")
 
 			if n==11:
 				Main_Menu()
