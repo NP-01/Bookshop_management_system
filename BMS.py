@@ -49,12 +49,37 @@ class Book:
 		if(a==1):
 			self.status = a
 			self.id = "BID" + str(int((random.random()*(10**6))))
+			
 			self.name = input("\nName:  ")
+			regex_name = re.compile(r'^([a-z]+)( [a-z]+)*( [a-z]+)*( [0-9])*$', re.IGNORECASE) 
+			while (bool(regex_name.search(self.name)) == False):
+				print("Invalid Book Name!\nEnter the book name again: ")
+				self.name = input()
+				
 			self.author =(input("\nAuthor:  "))
-			self.price= int(input("\nPrice:  "))
-			self.number_of_pages = int(input("\nNo. of Pages:  "))
+			regex_author = re.compile(r'^([a-z]+)(.+)*( +)*([a-z]+)*(.+)( )*([a-z]+)*$', re.IGNORECASE)
+			#regex_author = re.compile(r'^([a-z]+)*(.+)*( +)*([a-z]+)*(.+)*( +)*([a-z]+)*$', re.IGNORECASE)
+			while (bool(regex_author.search(self.author)) == False):
+				print("Invalid Name!\nEnter author again: ",end=" ")
+				self.author = input()
+
+			while True:
+				try:
+					self.price= int(input("\nPrice:  "))
+					self.number_of_pages = int(input("\nNo. of Pages:  "))
+					break
+				except ValueError:
+					print("Invalid Price or No. of Pages! Enter again.\n")
+			
 			self.stock = 1
-	# The default function is overwritten
+
+	# Operator Overloading
+	def __add__(self,n):
+		self.stock = self.stock + 1
+	def __sub__(self,n):
+		self.stock = self.stock - 1
+
+	# Function Overwriting
 	def __str__(self):
 		if(self.status==1):
 			return "%s\t%s\t\t%s" % (self.id,self.author,self.name)
@@ -67,6 +92,7 @@ class Book:
 		print("Author = ",self.author)
 		print("Price = ",self.price)
 		print("No. of Pages = ",self.number_of_pages)
+		print("No. of Copies = ",self.stock)
 
 def Display_All_Book():
 		os.system("clear")
@@ -105,7 +131,28 @@ def Create_Book():
 					print("Number of copies: ",B1.stock,"\nDo you wish to increment the stock ?...(y/n)")
 					ch = input()
 					if ch == 'y':
-						Modify_Book(B1.id)
+						books = []
+
+						with open('book.txt','rb') as file:
+							while True:
+								try:
+									books.append(pickle.load(file))
+								except EOFError:
+									break
+
+						for i in range(0,len(books)) :
+							if books[i].id == B1.id :
+								break
+
+						B1 = books[i]
+						B1+1
+						os.system("rm book.txt")
+						os.system("touch book.txt")
+
+						for book in books:
+							with open('book.txt','ab') as file:
+								pickle.dump(book,file)
+
 						break
 					else:
 						break
@@ -147,7 +194,7 @@ def Modify_Book(book_id):
 
 	B = books[i]
 	
-	print("Choose the parameter to modify:\n\n[1]Name\n\n[2]Author\n\n[3]Price\n\n[4]Number of Pages\n\n[5]Update Stock")
+	print("Choose the parameter to modify:\n\n[1]Name\n\n[2]Author\n\n[3]Price\n\n[4]Number of Pages\n\n[5]Update the stock")
 	p = int(input())
 		
 		
@@ -162,15 +209,16 @@ def Modify_Book(book_id):
 	
 	elif(p==4):
 		B.number_of_pages = int(input("Enter the new data:  "))
-	
-	elif(p==5):
-		s = int(input("Enter [1] to increment stock else [2] to decrement stock:  "))
 
-		if s==1:
-			B.stock = B.stock + 1
-		
-		elif s==2:
-			B.stock = B.stock - 1
+	elif(p==5):
+		n = int(input("Enter [1] to increment the stock else enter [2] to decrement the stock:  "))
+
+		if n==1:
+			B+1
+		if n==2:
+			B-1
+		else:
+			print("\n\nInvalid!\n\n")
 		
 	else:
 		print("Invalid Option!")
@@ -237,16 +285,33 @@ class Customer:
 		if(a==1):
 			self.status = a
 			self.id = "UID" + str(int((random.random()*(10**6))))
+			
 			self.name = input("\nName:  ")
-			self.age = int(input("\nAge:  "))
+			while (bool(re.fullmatch('[A-Za-z]{2,25}( [A-Za-z]{2,25})?', self.name)) == False):
+				print("Invalid Name!\nEnter your name again: ",end=" ")
+				self.name = input()
+			
+			while True:
+				try:
+					self.age = int(input("\nAge:  "))
+					break
+				except ValueError:
+					print("Invalid Age!\nEnter your age again.\n")
+
 			self.mobile_no = int(input("\nMobile No.:  "))
 			while ((isValid(str(self.mobile_no),1))==False):
 				self.mobile_no = int(input("\nInvalid mobile no!\nEnter mobile no. again:  "))
+			
 			self.occupation = input("\nOccupation:  ")
+			
 			self.email_id = input("\nEmail-id:  ")
 			while ((isValid(self.email_id,2))==False):
 				self.email_id = input("\nInvalid email id!\nEnter email-id again:  ")
 			self.purchased = 0
+
+	def __add__(self,n):
+		self.purchased = self.purchased + n
+
 # The default function is overwritten
 	def __str__(self):
 		if(self.status==1):
@@ -332,7 +397,7 @@ def Modify_Record(cust_id):
 
 	C = customers[i]
 
-	print("Choose the parameter to modify:\n\n[1]Name\n\n[2]Mobile number\n\n[3]Email-id\n\n[4]Purchased")
+	print("Choose the parameter to modify:\n\n[1]Name\n\n[2]Mobile number\n\n[3]Email-id")
 	p = int(input())
 			
 	if(p==1):
@@ -348,9 +413,6 @@ def Modify_Record(cust_id):
 		while ((isValid(C.email_id,2))==False):
 			C.email_id = input("\nInvalid email id!\nEnter email-id again:  ")
 		
-	elif(p==4):
-		C.purchased = C.purchased + 1
-
 	else:
 		print("Invalid Option!")
 	
@@ -402,6 +464,7 @@ def Book_Purchase():
 	n=int(input("[1] By Name\n[2] By Author\t"))
 
 	data = 1
+	found = 0
 	if(n==1):
 		name=str(input("Enter Book Name:  "))
 		with open('book.txt','rb') as file:
@@ -441,7 +504,7 @@ def Book_Purchase():
 		l = 1
 
 		for book in books:
-			print(l,"\b.")
+			print("\n",l,"\b.\n")
 			book.showdata()
 			print("\n\n")
 			l = l + 1
@@ -451,7 +514,7 @@ def Book_Purchase():
 		B = books[N-1]
 
 		if B.stock >=1 :
-			B.showdata()
+			print("\n\nThe total price to be paid: ",B.price,"\n\n")
 			pwd = getpass.getpass("Enter the admin password: ")
 			v = 3
 			while v!=0:
@@ -460,14 +523,67 @@ def Book_Purchase():
 					OTP = input("Enter the otp:  ")
 					if(OTP == otp):
 						print("Book purchase successful")
-						Modify_Book(B.id)
+						
+						books = []
+
+						with open('book.txt','rb') as file:
+							while True:
+								try:
+									books.append(pickle.load(file))
+								except EOFError:
+									break
+
+						for i in range(0,len(books)) :
+							if books[i].id == B.id :
+								break
+
+						B = books[i]
+						B-1
+						os.system("rm book.txt")
+						os.system("touch book.txt")
+
+						for book in books:
+							with open('book.txt','ab') as file:
+								pickle.dump(book,file)
+
 						cid = input("Enter customer id:  ")
-						Modify_Record(cid)
+						customers = []
+
+						with open('customers.txt','rb') as file:
+							while True:
+								try:
+									customers.append(pickle.load(file))
+								except EOFError:
+									break
+
+						for i in range(0,len(customers)) :
+							if customers[i].id == cid :
+								found = 1
+								break
+
+						if found==0:
+							print("\nCustomer does not exist !\n")
+							time.sleep(1)
+							Main_Menu()
+						
+						C = customers[i]
+						C+1
+						os.system("rm customers.txt")
+						os.system("touch customers.txt")
+
+						for customer in customers:
+							with open('customers.txt','ab') as file:
+								pickle.dump(customer,file)
+
 						break
+
 					else:
 						os.system("clear")
-						print(Fore.WHITE + "\n\n\t\tWrong OTP!")
+						print(Fore.RED + "\n\n\t\tWrong OTP!")
 						time.sleep(2)
+						print("\n\nThank You For Your Visit To Our Bookshop.\nPlease Do Visit Again\n")
+						time.sleep(1)
+						exit(0)
 						os.system("clear")
 						sys.exit()
 						end()
@@ -507,7 +623,9 @@ def Admin_Menu():
 		ch0 = 'y'
 		while ch0=='y' or ch0=='Y':
 			os.system("clear")
-			print("\nWelcome to the ADMINISTRATOR MENU!!!\n")
+			print("\n\n****************************")
+			print("     ADMINISTRATOR MENU     ")
+			print("****************************\n\n")
 			print("\n1. CREATE CUSTOMER RECORD")
 			print("\n2. DISPLAY ALL CUSTOMER RECORDS")
 			print("\n3. DISPLAY SPECIFIC CUSTOMER RECORD")
@@ -598,7 +716,8 @@ def Admin_Menu():
 			ch0 = 'N'
 			ch0 = input("\n\nDo you want to choose another option from the ADMINISTRATOR MENU....(y/N)?  ")
 	else: 
-		print("The password you entered is incorrect.")
+		print("\nINCORRECT PASSWORD!\n")
+		time.sleep(1)
 	
 	Main_Menu()
 
@@ -606,7 +725,15 @@ def Admin_Menu():
 
 def Main_Menu():
 	os.system("clear")
-	print("MAIN MENU")
+	print("                          		---------------------------------------------------------------------------------------------------------------------------")
+	print("                          		---------------------------------------------------------------------------------------------------------------------------")
+	print("                             		                                            WELCOME TO IIIT NAGPUR BOOKSHOP                                                ")
+	print("                          		---------------------------------------------------------------------------------------------------------------------------")
+	print("                          		---------------------------------------------------------------------------------------------------------------------------")
+
+	print("\n\n*******************")
+	print("     MAIN MENU     ")
+	print("*******************\n\n")
 	print("\n1. BOOK PURCHASE")
 	print("\n2. BOOK DONATE")
 	print("\n3. ADMINISTRATOR MENU")
@@ -623,6 +750,8 @@ def Main_Menu():
 		Admin_Menu()
 
 	else:
+		print("\n\nThank You Visitng Our Bookshop.\nPlease Do Visit Again\n")
+		time.sleep(1)
 		exit(0)
 
 Main_Menu()
